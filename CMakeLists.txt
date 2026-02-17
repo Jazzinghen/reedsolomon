@@ -6,15 +6,11 @@ find_package(
   COMPONENTS Interpreter Development.Module
   REQUIRED)
 
-add_custom_command(
-  OUTPUT creedsolo.c
-  COMMAND
-    Python::Interpreter -m cython
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/creedsolo/creedsolo.pyx" --output-file
-    creedsolo.c
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/creedsolo/creedsolo.pyx"
-  VERBATIM)
+include(UseCython)
 
-python_add_library(creedsolo MODULE creedsolo.c WITH_SOABI)
+cython_transpile("${CMAKE_CURRENT_SOURCE_DIR}/src/creedsolo/creedsolo.pyx"
+                 LANGUAGE C OUTPUT_VARIABLE creedsolo_c)
+
+python_add_library(creedsolo MODULE "${creedsolo_c}" WITH_SOABI)
 
 install(TARGETS creedsolo DESTINATION .)
