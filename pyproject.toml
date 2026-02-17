@@ -3,10 +3,10 @@
 # We here use a src-layout distribution style https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
 
 [build-system]
-# never uppercap requirements unless we have evidence it won't work https://iscinumpy.dev/post/bound-version-constraints/ 
+# never uppercap requirements unless we have evidence it won't work https://iscinumpy.dev/post/bound-version-constraints/
 # cython cannot be placed in optional-dependencies, Cython won't be able to do its magic to make it importable in setup.py
-requires = ["setuptools>59", "cython>=3.0.0b2"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.10", "setuptools-scm>=8", "cython", "cython-cmake"]
+build-backend = "scikit_build_core.build"
 
 [project]  # beware if using setuptools: setup.py still gets executed, and even if pyproject.toml fields take precedence, if there is any code error in setup.py, building will fail!
 name = "reedsolo"
@@ -19,7 +19,7 @@ authors = [
 maintainers = [
     {name = "Stephen Karl Larroque", email = "lrq3000@gmail.com"},
     ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = { file = "LICENSE" }
 keywords = ["data", "protection", "correction", "recovery", "restore", "save", "data-recovery", "reed-solomon", "error-correction-code", "qr", "qr-codes", "barcodes"]
 classifiers = [
@@ -36,12 +36,13 @@ classifiers = [
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: MicroPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Programming Language :: Cython",
@@ -54,10 +55,33 @@ classifiers = [
     "Topic :: System :: Recovery Tools",
     "Topic :: Utilities",
 ]
-dependencies = [
-    #"typing-extensions; python_version<'3.8'",
-    #"importlib_metadata;python_version<'3.8'",
-]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+build-dir = "build/{wheel_tag}"
+logging.level = "DEBUG"
+#cmake.source-dir = "app/"
+cmake.version = "CMakeLists.txt"
+ninja.make-fallback = true
+wheel.expand-macos-universal-tags = true
+wheel.install-dir = "creedsolo"
+cmake.build-type = "Release"
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+
+[tool.scikit-build.wheel.packages]
+reedsolo = "src/reedsolo"
+
+
+[[tool.scikit-build.overrides]]
+if.env.CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = true
+ninja.make-fallback = false
+
+[[tool.scikit-build.overrides]]
+if.state = "metadata_wheel"
+wheel.cmake = false
+wheel.platlib = true
+
+
 
 [project.urls]
 Homepage = "https://github.com/tomerfiliba-org/reedsolomon"
@@ -95,8 +119,11 @@ testoptional = [  # dependencies for additional optional tests
 file = "README.rst"
 content-type = "text/x-rst"
 
-#[tool.setuptools]
-#package-dir = {"" = "src"}
+[tool.setuptools]
+package-dir = {"" = "src"}
+ext-modules = [
+  {name = "creedsolo.creedsolo", sources = ["src/creedsolo/creedsolo.pyx"], annotate=true, force=true, compiler-directives={embedsignature= true, binding= true, initializedcheck= true }}
+]
 
 [tool.setuptools.packages.find]
 # IMPORTANT: systematically delete `src/<project.name>.egg-info` folder before rebuilding, otherwise the list of included files will not get updated (it's in `SOURCES.txt` file in this folder)
@@ -184,7 +211,23 @@ archs = ["auto"]
 #dependency-versions = "pinned"
 #environment = {"REEDSOLO_CYTHONIZE: 1"}
 #environment-pass = []
-build-verbosity = "1"
+build-verbosity = 1
+
+build = "{cp313,cp314,cp314t}-{macosx_arm64,win_amd64,manylinux_x86_64,manylinux_aarch64}"
+#test-extras = "test"
+#test-command = "pytest {project}/tests"
+build-frontend = "build[uv]"
+environment = { CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = "1" }
+before-build = "rm -rf build"
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+manylinux-ppc64le-image = "manylinux_2_28"
+manylinux-s390x-image = "manylinux_2_28"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-macos*"
+inherit.environment = "append"
+environment = { MACOSX_DEPLOYMENT_TARGET = "14.5" }
 
 #before-all = ""
 #before-build = ""
