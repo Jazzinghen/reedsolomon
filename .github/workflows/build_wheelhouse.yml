@@ -1,4 +1,4 @@
-name: Build_wheelhouse
+name: Build release and publish to pypi
 # Cross-platform wheel and sdist builder and pypi uploader for Python modules
 # From: https://github.com/pypa/cibuildwheel/blob/main/examples/github-deploy.yml and https://github.com/dnicolodi/python-siphash24/blob/0027da083e104af2a8216a51bed7650977fb2c43/.github/workflows/wheels.yml
 # NOTE: if you get a syntax error on a line and it's the start of a job block, then it means that there may be an indentation error anywhere inside the block (hence on a line that is much further than the shown one for the error!). This often happens when copy/pasting from a different config files with a different nesting.
