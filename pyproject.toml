@@ -119,30 +119,6 @@ testoptional = [  # dependencies for additional optional tests
 file = "README.rst"
 content-type = "text/x-rst"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-ext-modules = [
-  {name = "creedsolo.creedsolo", sources = ["src/creedsolo/creedsolo.pyx"], annotate=true, force=true, compiler-directives={embedsignature= true, binding= true, initializedcheck= true }}
-]
-
-[tool.setuptools.packages.find]
-# IMPORTANT: systematically delete `src/<project.name>.egg-info` folder before rebuilding, otherwise the list of included files will not get updated (it's in `SOURCES.txt` file in this folder)
-where = ["src"]
-#exclude = ["test*"]
-#namespaces = false
-
-[tool.setuptools.package-data]
-# Check the <mypkg>.egg-info/SOURCES.txt file generated after a `build` or `pip install` to check if the following files are correctly included in the sdist.
-# Check also the list of files included by default: https://packaging.python.org/en/latest/guides/using-manifest-in/
-"*" = [
-    "*.rst",
-    "LICENSE*",
-    "README*",
-    "*.pyx",  # include the cython implementation sourcecode in the wheel, so that the user can cythonize later, this is necessary, it's not included by default even with extensions in setup.py
-    "*.c",  # include the cythonized intermediary .c file for source distributions such as Gentoo, so that they do not need to install Cython v3 - no need since we use src-layout, it's automatically included
-    #"tests",  # to help linux distros package builders, they may want to run the unit test to check their package is working OK - no need, tests folder is packaged by default in sdist nowadays
-]
-
 #[tool.setuptools.exclude-package-data]
 #"*" = [
 #    "docs/_build",
