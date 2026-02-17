@@ -19,7 +19,7 @@ authors = [
 maintainers = [
     {name = "Stephen Karl Larroque", email = "lrq3000@gmail.com"},
     ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
 keywords = ["data", "protection", "correction", "recovery", "restore", "save", "data-recovery", "reed-solomon", "error-correction-code", "qr", "qr-codes", "barcodes"]
 classifiers = [
@@ -36,8 +36,6 @@ classifiers = [
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -81,8 +79,6 @@ if.state = "metadata_wheel"
 wheel.cmake = false
 wheel.platlib = true
 
-
-
 [project.urls]
 Homepage = "https://github.com/tomerfiliba-org/reedsolomon"
 Documentation = "https://github.com/tomerfiliba-org/reedsolomon/blob/master/README.rst"
@@ -92,26 +88,22 @@ Download = "https://github.com/tomerfiliba-org/reedsolomon/releases"
 "Conda-Forge" = "https://anaconda.org/conda-forge/reedsolo"
 #Changelog = "https://url/changelog"
 
-[project.optional-dependencies]
-# tests_require was deprecated in setup.py by setuptools, because anyway downstream the user wants to test in their own environment, not an isolated env, so the only practical replacement is to have test requirements defined as an extras/optional-dependency [test] so that they can be installed in the user's environment if they want to: https://discuss.python.org/t/providing-a-way-to-specify-how-to-run-tests-and-docs/15016
+[dependency-groups]
 test = [  # minimum dependencies to run tests
-    "pytest",
-    "pytest-cov",
-    "coveralls",
-    "cython>=3.0.0b2",
+    "pytest>=9.0",
+    "pytest-cov>=7.0",
+    "coveralls>=4.0",
+    "cython>=3.2"
 ]
 testmeta = [  # dependencies to test meta-data. Note that some of these dependencies make cibuildwheel choke on cryptography
     "build",
     "twine",
     "validate-pyproject",
-    "rstcheck",
+    "rstcheck>=6.2",
 ]
 testoptional = [  # dependencies for additional optional tests
-    "unireedsolomon"
+    "unireedsolomon>=1.0"
 ]
-#cythonize = [  # cython and other build time dependencies can NOT be defined as optional-dependencies nor extras, they are installed only after build! They need to be defined as build-system requirements. But it's possible to make it installable as an option given a config-setting arg, see: https://discuss.python.org/t/explicit-optional-cythonization-via-config-setting-post-pep517-and-install-option-deprecation/
-#    "cython>=3.0.0b2"
-#]
 
 [project.readme]
 # Do NOT use .. code:: python for interactive code session, otherwise syntax error due to prompt handle >>>, see https://svn.python.org/projects/external/Sphinx-1.2/doc/markup/code.rst and https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html#python-docstrings
@@ -119,12 +111,6 @@ testoptional = [  # dependencies for additional optional tests
 file = "README.rst"
 content-type = "text/x-rst"
 
-#[tool.setuptools.exclude-package-data]
-#"*" = [
-#    "docs/_build",
-#    "tests/__pycache__",
-#    "tests/.mypy_cache",
-#]
 
 [tool.pytest.ini_options]
 addopts = [
@@ -189,7 +175,7 @@ archs = ["auto"]
 #environment-pass = []
 build-verbosity = 1
 
-build = "{cp313,cp314,cp314t}-{macosx_arm64,win_amd64,manylinux_x86_64,manylinux_aarch64}"
+build = "{cp310, cp311, cp312, cp313,cp314,cp314t}-{macosx_arm64,win_amd64,manylinux_x86_64,manylinux_aarch64}"
 #test-extras = "test"
 #test-command = "pytest {project}/tests"
 build-frontend = "build[uv]"
@@ -198,12 +184,7 @@ before-build = "rm -rf build"
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
 manylinux-ppc64le-image = "manylinux_2_28"
-manylinux-s390x-image = "manylinux_2_28"
 
-[[tool.cibuildwheel.overrides]]
-select = "*-macos*"
-inherit.environment = "append"
-environment = { MACOSX_DEPLOYMENT_TARGET = "14.5" }
 
 #before-all = ""
 #before-build = ""
@@ -213,9 +194,6 @@ test-command = "pytest {package}/tests"
 #before-test = ""
 #test-requires = []
 test-extras = ["test"]  # reuse the [test] extras optional dependencies to install test dependencies, instead of redefining in test-requires
-
-[tool.cibuildwheel.config-settings]
---build-option = "--cythonize"
 
 # NOTE: you have to use single-quoted strings in TOML for regular expressions.
 # It's the equivalent of r-strings in Python.  Multiline strings are treated as
@@ -234,3 +212,9 @@ test-extras = ["test"]  # reuse the [test] extras optional dependencies to insta
 # want stable formatting across releases, you should keep
 # this off.
 #preview = false
+
+
+[[tool.cibuildwheel.overrides]]
+select = "*-macos*"
+inherit.environment = "append"
+environment = { MACOSX_DEPLOYMENT_TARGET = "14.5" }
