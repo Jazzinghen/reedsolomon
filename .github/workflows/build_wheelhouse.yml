@@ -10,6 +10,7 @@ on:
   release:  # build on every releases
     types:
     - published  # use published, not released and prereleased, because prereleased is not triggered if created from a draft: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
+  workflow_dispatch:
 
 jobs:
   build_wheels:
