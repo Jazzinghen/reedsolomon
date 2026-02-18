@@ -4,11 +4,10 @@
 
 [build-system]
 # never uppercap requirements unless we have evidence it won't work https://iscinumpy.dev/post/bound-version-constraints/
-# cython cannot be placed in optional-dependencies, Cython won't be able to do its magic to make it importable in setup.py
 requires = ["scikit-build-core>=0.10", "setuptools-scm>=8", "cython>=3.2", "cython-cmake>=0.2"]
 build-backend = "scikit_build_core.build"
 
-[project]  # beware if using setuptools: setup.py still gets executed, and even if pyproject.toml fields take precedence, if there is any code error in setup.py, building will fail!
+[project]
 name = "reedsolo"
 description = "Pythonic universal errors-and-erasures Reed-Solomon codec to protect your data from errors and bitrot, with a future-proof zero-dependencies pure-python implementation and an optional speed-optimized Cython/C extension."
 authors = [
@@ -54,30 +53,12 @@ classifiers = [
 ]
 dynamic = ["version"]
 
-[tool.scikit-build]
-minimum-version = "build-system.requires"
-build-dir = "build/{wheel_tag}"
-logging.level = "DEBUG"
-#cmake.source-dir = "app/"
-cmake.version = "CMakeLists.txt"
-cmake.build-type = "Release"
-ninja.make-fallback = true
-wheel.expand-macos-universal-tags = true
-wheel.install-dir = "creedsolo"
-wheel.packages = ["src/reedsolo", "src/creedsolo"]
-wheel.exclude = ["**.pyx"]
-metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
-sdist.exclude = ["**.c"]
+[project.readme]
+# Do NOT use .. code:: python for interactive code session, otherwise syntax error due to prompt handle >>>, see https://svn.python.org/projects/external/Sphinx-1.2/doc/markup/code.rst and https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html#python-docstrings
+# also use rstcheck
+file = "README.rst"
+content-type = "text/x-rst"
 
-
-[[tool.scikit-build.overrides]]
-if.env.CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = true
-ninja.make-fallback = false
-
-[[tool.scikit-build.overrides]]
-if.state = "metadata_wheel"
-wheel.cmake = false
-wheel.platlib = true
 
 [project.urls]
 Homepage = "https://github.com/tomerfiliba-org/reedsolomon"
@@ -101,9 +82,8 @@ test = [  # minimum dependencies to run tests
     "cython>=3.2"
 ]
 testmeta = [  # dependencies to test meta-data. Note that some of these dependencies make cibuildwheel choke on cryptography
-    "build",
-    "twine",
-    "validate-pyproject",
+    "twine>=6.2",
+    "validate-pyproject>=0.25",
     "rstcheck>=6.2",
 ]
 testoptional = [  # dependencies for additional optional tests
@@ -113,11 +93,36 @@ testoptional = [  # dependencies for additional optional tests
 [tool.uv]
 default-groups = ["dev"]
 
-[project.readme]
-# Do NOT use .. code:: python for interactive code session, otherwise syntax error due to prompt handle >>>, see https://svn.python.org/projects/external/Sphinx-1.2/doc/markup/code.rst and https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html#python-docstrings
-# also use rstcheck
-file = "README.rst"
-content-type = "text/x-rst"
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+build-dir = "build/{wheel_tag}"
+logging.level = "DEBUG"
+cmake.version = "CMakeLists.txt"
+cmake.build-type = "Release"
+ninja.make-fallback = true
+wheel.expand-macos-universal-tags = true
+wheel.install-dir = "creedsolo"
+wheel.packages = ["src/reedsolo", "src/creedsolo"]
+wheel.exclude = ["**.pyx"]
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+sdist.exclude = ["**.c"]
+
+
+[[tool.scikit-build.overrides]]
+if.env.CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = true
+ninja.make-fallback = false
+
+[[tool.scikit-build.overrides]]
+if.state = "metadata_wheel"
+wheel.cmake = false
+wheel.platlib = true
+
 
 
 [tool.pytest.ini_options]
@@ -179,7 +184,7 @@ archs = ["auto"]
 
 build-frontend = "build[uv]"
 environment = { CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = "1" }
-before-build = "uvx nox -s cibuild_prepare"
+before-build = "uv run tool nox -s cibuild_prepare"
 
 #before-all = ""
 #before-build = ""
