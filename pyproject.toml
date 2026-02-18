@@ -184,7 +184,7 @@ archs = ["auto"]
 
 build-frontend = "build[uv]"
 environment = { CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = "1" }
-before-build = "uv run tool nox -s cibuild_prepare"
+before-build = "uv tool run nox -s cibuild_prepare"
 
 #before-all = ""
 #before-build = ""
