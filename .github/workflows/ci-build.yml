@@ -71,6 +71,6 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Finished
-        run: uv run coveralls --finish
+        run: uvx coveralls --finish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
