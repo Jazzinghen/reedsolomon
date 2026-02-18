@@ -17,7 +17,9 @@ def cibuild_prepare(session: nox.Session) -> None:
     build_path = project_path / "build"
 
     if session.posargs:
-        sub_parser = argparse.ArgumentParser(prog="Nox CIBuldWheel environment cleaner")
+        sub_parser = argparse.ArgumentParser(
+            prog="Nox CIBuildWheel environment cleaner"
+        )
         sub_parser.add_argument("-o", "--build-path", type=Path)
         sub_namespace = sub_parser.parse_args(session.posargs)
 
