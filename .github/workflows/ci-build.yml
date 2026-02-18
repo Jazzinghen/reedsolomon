@@ -25,6 +25,8 @@ jobs:
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-latest] # jobs that run on Windows and macOS runners that GitHub hosts consume minutes at 2 and 10 times the rate that jobs on Linux runners consume respectively. But it's free for public OSS repositories.
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Install uv with python ${{ matrix.python-version }}
         uses: astral-sh/setup-uv@v7
