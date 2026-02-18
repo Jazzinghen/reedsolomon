@@ -5,12 +5,11 @@
 [build-system]
 # never uppercap requirements unless we have evidence it won't work https://iscinumpy.dev/post/bound-version-constraints/
 # cython cannot be placed in optional-dependencies, Cython won't be able to do its magic to make it importable in setup.py
-requires = ["scikit-build-core>=0.10", "setuptools-scm>=8", "cython", "cython-cmake"]
+requires = ["scikit-build-core>=0.10", "setuptools-scm>=8", "cython>=3.2", "cython-cmake>=0.2"]
 build-backend = "scikit_build_core.build"
 
 [project]  # beware if using setuptools: setup.py still gets executed, and even if pyproject.toml fields take precedence, if there is any code error in setup.py, building will fail!
 name = "reedsolo"
-version = "2.1.3b1"  # see PEP 440 https://peps.python.org/pep-0440/#pre-releases
 description = "Pythonic universal errors-and-erasures Reed-Solomon codec to protect your data from errors and bitrot, with a future-proof zero-dependencies pure-python implementation and an optional speed-optimized Cython/C extension."
 authors = [
     {name = "Tomer Filiba", email = "tomerfiliba@gmail.com"},
@@ -53,6 +52,7 @@ classifiers = [
     "Topic :: System :: Recovery Tools",
     "Topic :: Utilities",
 ]
+dynamic = ["version"]
 
 [tool.scikit-build]
 minimum-version = "build-system.requires"
@@ -60,14 +60,14 @@ build-dir = "build/{wheel_tag}"
 logging.level = "DEBUG"
 #cmake.source-dir = "app/"
 cmake.version = "CMakeLists.txt"
+cmake.build-type = "Release"
 ninja.make-fallback = true
 wheel.expand-macos-universal-tags = true
 wheel.install-dir = "creedsolo"
-cmake.build-type = "Release"
-metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
 wheel.packages = ["src/reedsolo", "src/creedsolo"]
-sdist.exclude = ["**.c"]
 wheel.exclude = ["**.pyx"]
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+sdist.exclude = ["**.c"]
 
 
 [[tool.scikit-build.overrides]]
@@ -89,6 +89,11 @@ Download = "https://github.com/tomerfiliba-org/reedsolomon/releases"
 #Changelog = "https://url/changelog"
 
 [dependency-groups]
+dev = [
+    "ipython>=8.38.0",
+    "nox>=2026.2.9",
+    "ruff>=0.15.1",
+]
 test = [  # minimum dependencies to run tests
     "pytest>=9.0",
     "pytest-cov>=7.0",
@@ -104,6 +109,9 @@ testmeta = [  # dependencies to test meta-data. Note that some of these dependen
 testoptional = [  # dependencies for additional optional tests
     "unireedsolomon>=1.0"
 ]
+
+[tool.uv]
+default-groups = ["dev"]
 
 [project.readme]
 # Do NOT use .. code:: python for interactive code session, otherwise syntax error due to prompt handle >>>, see https://svn.python.org/projects/external/Sphinx-1.2/doc/markup/code.rst and https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html#python-docstrings
@@ -171,7 +179,7 @@ archs = ["auto"]
 
 build-frontend = "build[uv]"
 environment = { CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = "1" }
-before-build = "rm -rf build"
+before-build = "uvx nox -s cibuild_prepare"
 
 #before-all = ""
 #before-build = ""
@@ -197,9 +205,3 @@ before-test = "uv sync --no-install-project --active --group test --group testop
 # want stable formatting across releases, you should keep
 # this off.
 #preview = false
-
-
-[[tool.cibuildwheel.overrides]]
-select = "*-macos*"
-inherit.environment = "append"
-environment = { MACOSX_DEPLOYMENT_TARGET = "14.5" }
