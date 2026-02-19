@@ -3,13 +3,13 @@
 # We here use a src-layout distribution style https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
 
 [build-system]
-# never uppercap requirements unless we have evidence it won't work https://iscinumpy.dev/post/bound-version-constraints/
-requires = ["scikit-build-core>=0.10", "setuptools-scm>=8", "cython>=3.2", "cython-cmake>=0.2"]
-build-backend = "scikit_build_core.build"
+requires = ["uv_build>=0.10.4,<0.11.0"]
+build-backend = "uv_build"
 
 [project]
 name = "reedsolo"
-description = "Pythonic universal errors-and-erasures Reed-Solomon codec to protect your data from errors and bitrot, with a future-proof zero-dependencies pure-python implementation and an optional speed-optimized Cython/C extension."
+version = "2.2.0b1"
+description = "Zero-dependencies, pure-python universal errors-and-erasures Reed-Solomon codec to protect your data from errors and bitrot."
 authors = [
     {name = "Tomer Filiba", email = "tomerfiliba@gmail.com"},
     {name = "Stephen Karl Larroque", email = "lrq3000@gmail.com"},
@@ -51,7 +51,6 @@ classifiers = [
     "Topic :: System :: Recovery Tools",
     "Topic :: Utilities",
 ]
-dynamic = ["version"]
 
 [project.readme]
 # Do NOT use .. code:: python for interactive code session, otherwise syntax error due to prompt handle >>>, see https://svn.python.org/projects/external/Sphinx-1.2/doc/markup/code.rst and https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html#python-docstrings
@@ -79,7 +78,6 @@ test = [  # minimum dependencies to run tests
     "pytest>=9.0",
     "pytest-cov>=7.0",
     "coveralls>=4.0",
-    "cython>=3.2"
 ]
 testmeta = [  # dependencies to test meta-data. Note that some of these dependencies make cibuildwheel choke on cryptography
     "twine>=6.2",
@@ -88,6 +86,11 @@ testmeta = [  # dependencies to test meta-data. Note that some of these dependen
 ]
 testoptional = [  # dependencies for additional optional tests
     "unireedsolomon>=1.0"
+]
+
+[project.optional-dependencies]
+creedsolo = [
+    "creedsolo == 2.2.0b1"
 ]
 
 [tool.uv]
@@ -99,30 +102,13 @@ url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
 
-[tool.scikit-build]
-minimum-version = "build-system.requires"
-build-dir = "build/{wheel_tag}"
-logging.level = "DEBUG"
-cmake.version = "CMakeLists.txt"
-cmake.build-type = "Release"
-ninja.make-fallback = true
-wheel.expand-macos-universal-tags = true
-wheel.install-dir = "creedsolo"
-wheel.packages = ["src/reedsolo", "src/creedsolo"]
-wheel.exclude = ["**.pyx", "**.c"]
-metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+[tool.uv.sources]
+creedsolo = { workspace = true }
 
-
-[[tool.scikit-build.overrides]]
-if.env.CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = true
-ninja.make-fallback = false
-
-[[tool.scikit-build.overrides]]
-if.state = "metadata_wheel"
-wheel.cmake = false
-wheel.platlib = true
-
-
+[tool.uv.workspace]
+members = [
+    "packages/creedsolo",
+]
 
 [tool.pytest.ini_options]
 addopts = [
@@ -131,7 +117,7 @@ addopts = [
     "--strict-markers",
 ]
 xfail_strict = true
-testpaths = "tests"  # default path to look for tests if nothing is specified in commandline
+testpaths = ["tests", "packages/creedsolo/tests"]  # default path to look for tests if nothing is specified in commandline
 filterwarnings = [
     "once::Warning",
 ]
@@ -174,38 +160,3 @@ exclude_lines = [
     "^ +\\.\\.\\.$",
     "-> ['\"]?NoReturn['\"]?:",
 ]
-
-[tool.cibuildwheel]
-
-build-verbosity = 1
-build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*", "cp314t-*"]
-archs = ["auto"]
-
-build-frontend = "build[uv]"
-environment = { CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = "1" }
-before-build = "uv tool run nox -s cibuild_prepare"
-
-#before-all = ""
-#before-build = ""
-#repair-wheel-command = ""
-
-test-command = "pytest {package}/tests"
-before-test = "uv sync --no-install-project --active --group test --group testoptional"
-
-# NOTE: you have to use single-quoted strings in TOML for regular expressions.
-# It's the equivalent of r-strings in Python.  Multiline strings are treated as
-# verbose regular expressions by Black.  Use [ ] to denote a significant space
-# character.
-
-# While black is awesome, it does not support cython, so we avoid for the moment
-# to keep a similar formatting between the pure python and the cython implementations.
-# see: https://github.com/psf/black/issues/359
-
-#[tool.black]
-#line-length = 88
-#target-version = ['py39', 'py310', 'py311']
-#include = '\.pyi?$'
-# We use preview style for formatting Black itself. If you
-# want stable formatting across releases, you should keep
-# this off.
-#preview = false
