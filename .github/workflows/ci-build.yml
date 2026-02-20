@@ -56,13 +56,14 @@ jobs:
       - name: Twine check
         if: ${{ matrix.python-version == '3.14' }}
         run: |
-          uv build --sdist
+          uv build --all-packages --sdist
           uv run twine check "dist/*"
           uv run rstcheck README.rst
 
       - name: pyproject.toml validity
         if: ${{ matrix.python-version == '3.14' }}
-        run: uv run validate-pyproject pyproject.toml -v
+        run: |
+          uv run validate-pyproject pyproject.toml packages/creedsolo/pyproject.toml -v
 
   coveralls:
     name: Wrap up Coveralls report

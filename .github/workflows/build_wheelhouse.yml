@@ -34,11 +34,12 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.1
         with:
+          package-dir: packages/creedsolo
           extras: "uv"
 
       - uses: actions/upload-artifact@v6
         with:
-          name: reedsolo-wheel-${{ matrix.os }}
+          name: creedsolo-wheel-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
   build_sdist:
@@ -52,26 +53,31 @@ jobs:
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v7
 
-      - name: Build SDist file
-        run: uv build --sdist
+      - name: Build SDist files
+        run: uv build --all-packages --sdist
+
+      - name: Build reedsolo wheel file
+        run: uv build --wheel
 
       - uses: actions/upload-artifact@v6
         with:
           name: reedsolo-sdist
           path: ./dist/*.tar.gz
 
+      - uses: actions/upload-artifact@v6
+        with:
+          name: reedsolo-wheel
+          path: ./dist/*.whl
+
   upload_test_pypi: # Upload to TestPyPi first to ensure that the release is OK (we will try to download it and install it afterwards), as recommended in https://py-pkgs.org/08-ci-cd#uploading-to-testpypi-and-pypi
     name: Upload to TestPyPi
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
     steps:
       - name: Unpack default artifact into dist/
         uses: actions/download-artifact@v7
         with:
-          # unpacks default artifact into dist/
-          # if `name: artifact` is omitted, the action will create extra parent dir
-          name: reedsolo-*
+          # Copy all output artifacts to dist
           path: dist
           merge-multiple: true
 
@@ -89,7 +95,7 @@ jobs:
           pip install \
           --index-url https://test.pypi.org/simple/ \
           --extra-index-url https://pypi.org/simple \
-          reedsolo
+          "reedsolo[creedsolo]"
 
   upload_pypi: # Upload to the real PyPi if everything else worked before, as suggested in: https://py-pkgs.org/08-ci-cd#uploading-to-testpypi-and-pypi
     name: Upload to the real PyPi
@@ -99,9 +105,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v7
         with:
-          # unpacks default artifact into dist/
-          # if `name: artifact` is omitted, the action will create extra parent dir
-          name: reedsolo-*
+          # Copy all output artifacts to dist
           path: dist
           merge-multiple: true
 
