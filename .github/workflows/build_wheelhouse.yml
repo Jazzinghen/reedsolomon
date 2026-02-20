@@ -73,6 +73,7 @@ jobs:
     name: Upload to TestPyPi
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
     steps:
       - name: Unpack default artifact into dist/
         uses: actions/download-artifact@v7
@@ -99,7 +100,7 @@ jobs:
 
   upload_pypi: # Upload to the real PyPi if everything else worked before, as suggested in: https://py-pkgs.org/08-ci-cd#uploading-to-testpypi-and-pypi
     name: Upload to the real PyPi
-    needs: [build_wheels, build_sdist, upload_test_pypi]
+    needs: [upload_test_pypi]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
     steps:
