@@ -138,14 +138,14 @@ archs = ["auto"]
 
 build-frontend = { name = "build[uv]" }
 environment = { CMAKE_PYTHON_DIST_FORCE_NINJA_DEP = "1" }
-before-build = "uv tool run nox -s cibuild_prepare"
+before-build = "uv tool run nox -f {package}/noxfile.py -s cibuild_prepare"
 
 #before-all = ""
 #before-build = ""
 #repair-wheel-command = ""
 
 test-command = "pytest {package}/tests"
-before-test = "uv sync --no-install-project --active --group test --group testoptional"
+before-test = "uv sync --no-install-project --package creedsolo --active --group test --group testoptional"
 
 # NOTE: you have to use single-quoted strings in TOML for regular expressions.
 # It's the equivalent of r-strings in Python.  Multiline strings are treated as
