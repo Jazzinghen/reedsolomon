@@ -51,8 +51,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "Programming Language :: Python :: Implementation :: MicroPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
     "Programming Language :: Cython",
     "Topic :: Communications",
     "Topic :: Scientific/Engineering :: Mathematics",
@@ -145,7 +143,7 @@ before-build = "uv tool run nox -f {package}/noxfile.py -s cibuild_prepare"
 #repair-wheel-command = ""
 
 test-command = "pytest {package}/tests"
-before-test = "uv sync --no-install-project --package creedsolo --active --group test --group testoptional"
+before-test = "uv sync --no-install-project --active --group test --group testoptional --group testcreedsolo"
 
 # NOTE: you have to use single-quoted strings in TOML for regular expressions.
 # It's the equivalent of r-strings in Python.  Multiline strings are treated as

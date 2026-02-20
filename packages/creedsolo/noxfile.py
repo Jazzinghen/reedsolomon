@@ -25,9 +25,11 @@ def cibuild_prepare(session: nox.Session) -> None:
 
         try:
             if sub_namespace.build_path:
-                build_path = Path(sub_namespace.build_path).resolve()
-        except (FileNotFoundError, RuntimeError) as exc:
-            session.error(f"Encountered an error when trying to resolve a path: {exc}")
+                build_path = Path(sub_namespace.build_path).resolve(strict=True)
+        except (FileNotFoundError, RuntimeError, OSError) as exc:
+            session.error(
+                f"Encountered an error when trying to resolve build path to clean: {exc}"
+            )
 
         try:
             _ = build_path.relative_to(project_path)
