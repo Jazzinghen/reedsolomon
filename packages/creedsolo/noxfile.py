@@ -35,7 +35,17 @@ def cibuild_prepare(session: nox.Session) -> None:
             _ = build_path.relative_to(project_path)
         except ValueError:
             session.error(
-                "The provided path is outside the project root. Let's avoid destroying folders for no reason."
+                "The provided path must point to subdirectories under project root only."
+            )
+
+        if build_path == project_path:
+            session.error(
+                "The provided path must point to subdirectories under project root only."
+            )
+
+        if not build_path.is_dir():
+            session.error(
+                "The provided path must point to subdirectories under project root only."
             )
 
     session.log(f"Removing previous build path {build_path}")
